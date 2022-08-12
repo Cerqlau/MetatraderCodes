@@ -49,7 +49,7 @@ Essas instruções permitirão que você obtenha uma cópia do projeto em opera�
 
 ### 📨 Distribuição
 
-É possivel efetuar a distribuição através dos arquivos de códigos gerados para estudo. Caso a distribução seja somente do arquvo executável gerado após a compilação, o mesmo não permite verificação do código 
+É possivel efetuar a distribuição através dos arquivos de códigos gerados para estudo. Caso a distribução seja somente do arquivo executável gerado após a compilação, o mesmo não permite verificação do código 
 
 ## 📦 Desenvolvimento
 
