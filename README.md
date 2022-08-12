@@ -16,7 +16,7 @@ Essas instruções permitirão que você obtenha uma cópia do projeto em opera�
 
 ### 🔧 Pré-configurações
 
-1- Alguns códigos e EA's necessitam de bibliotecas específicas, estas devem ser verificados na parte descritiva do código
+1- Alguns códigos e EA's necessitam de bibliotecas de terceiros específicas, estas devem ser verificados na parte descritiva do código
 
 ```
 
