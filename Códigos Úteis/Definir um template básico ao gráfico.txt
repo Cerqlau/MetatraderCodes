@@ -1,0 +1,125 @@
+//Função que define um template básico direto por código, sem importar arquivo. Funciona tanto em backtest como em tempo real.
+//+------------------------------------------------------------------+
+//| Definir um template básico ao gráfico                            |
+//+------------------------------------------------------------------+
+bool ChartDefines(const bool value,const long chart_ID=0)
+  {
+//--- Resetar Ultimo Erro
+   ResetLastError();
+
+//--- Definir Exibição Do Grid
+   if(!ChartSetInteger(chart_ID,CHART_SHOW_GRID,0,false))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir Exibição Do de ask
+   if(!ChartSetInteger(chart_ID,CHART_SHOW_ASK_LINE,0,true))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor da Linha Ask
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_ASK,clrDeepSkyBlue))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir Exibição Do de bid
+   if(!ChartSetInteger(chart_ID,CHART_SHOW_BID_LINE,0,true))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor da Linha bid
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_BID,clrGold))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor do grafico de linha
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_CHART_LINE,clrBlue))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+//--- Definir cor da linha do ultimo Preço
+   if(!ChartSetInteger(chart_ID,CHART_SHOW_LAST_LINE,true))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+//--- Definir cor da linha do ultimo Preço
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_LAST,clrBlue))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor do Primeiro Plano
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_FOREGROUND,clrBlack))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor Do Fundo
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_BACKGROUND,clrWhite))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor Do Candle De Alta
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_CANDLE_BULL,clrGreen))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor da Barra de Alta
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_CHART_UP,clrGreen))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor da Barra de baixa
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_CHART_DOWN,clrRed))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//--- Definir cor do Candle de Baixa
+   if(!ChartSetInteger(chart_ID,CHART_COLOR_CANDLE_BEAR,clrRed))
+     {
+      //--- Caso Der Erro Exibilo
+      Print(__FUNCTION__+", Error Code = ",GetLastError());
+      return(false);
+     }
+
+//---
+   return(true);
+  }
+//+------------------------------------------------------------------+
+
+

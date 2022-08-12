@@ -1,0 +1,17 @@
+double NormalizePrice(double price, string symbol=NULL, double size=0)
+{
+   double _tick = size ? size : SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
+   return round(price / _tick) * _tick;
+}
+
+
+
+double NormalizeVolume(double volume, string symbol=NULL)
+{
+   double min  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double max  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   int digits  = (int)-MathLog10(SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP));
+   if (volume < min) volume = min;
+   if (volume > max) volume = max;
+   return NormalizeDouble(volume, digits);
+}

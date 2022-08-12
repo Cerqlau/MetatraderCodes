@@ -1,0 +1,7 @@
+long RandomMagicNumber(long min=100000, long max=999999)
+{
+   static bool firstRun = true;
+   if (firstRun) srand(_RandomSeed);
+   firstRun = false;
+   return min+(rand()*rand()%(max-min+1));
+}

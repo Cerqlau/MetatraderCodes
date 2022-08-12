@@ -1,0 +1,35 @@
+Função para melhorar as linhas design das linhas de  TP e SL. É possível alterar as cores, mudar o tipo de traçado, e a espessura da linha. 
+
+
+//+------------------------------------------------------------------+
+//|  "FUNÇÕES PARA AUXILIAR NA VISUALIZAÇÃO DOS TP E SL"             |
+//+------------------------------------------------------------------+
+void Linha_Horizontal(string nome, double Price, int largura, color cor = clrBlue, ENUM_LINE_STYLE style = STYLE_SOLID)
+{
+   static datetime last_time=0;
+   datetime lastbar_time=(datetime)SeriesInfoInteger(Symbol(),Period(),SERIES_LASTBAR_DATE);
+  
+   ObjectCreate(0, nome, OBJ_HLINE, 0, lastbar_time, Price, 0);
+
+   ObjectSetInteger(0, nome, OBJPROP_WIDTH, largura);
+   ObjectSetInteger(0, nome, OBJPROP_STYLE, style);
+   ObjectSetInteger(0, nome, OBJPROP_COLOR, cor);
+   ObjectSetInteger(0, nome, OBJPROP_SELECTED, false);
+   ObjectSetInteger(0, nome, OBJPROP_ZORDER, 0);
+}
+
+// -----> Esta aqui colar no final do OnTick (sugestão aqui para otimizar o código -> Checar a já existência do objeto e apenas mudar o preço dele, somente criar uma vez)
+
+{
+   //Redesenha as linhas de STOP e TAKE PROFIT
+   ObjectDelete(0, "StopLoss");
+   ObjectDelete(0, "TakeProfit");
+   Linha_Horizontal("StopLoss",PosicaoInfo.StopLoss(),1,clrRed,STYLE_SOLID);
+   Linha_Horizontal("TakeProfit",PosicaoInfo.TakeProfit(),1,clrDeepSkyBlue,STYLE_SOLID);
+}
+
+//-----> E esta no final do OnInit
+{
+   //Tira as cores de stop e take padrão do MT5
+   ChartSetInteger(0,CHART_COLOR_STOP_LEVEL,0,clrNONE);
+}

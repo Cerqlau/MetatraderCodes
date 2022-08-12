@@ -1,0 +1,16 @@
+ 
+void ObjectsArrowToBack()
+{
+   static int totalLast = 0;
+   int total = ObjectsTotal(0);
+   if (total == totalLast) return;
+   totalLast = total;
+   for(int i = total - 1; i >= 0; i--)
+   {
+      if(StringFind(ObjectName(0, i), "#") >= 0)
+      {
+         ObjectSetInteger(0, ObjectName(0, i), OBJPROP_BACK, true);
+      }
+   }
+}
+

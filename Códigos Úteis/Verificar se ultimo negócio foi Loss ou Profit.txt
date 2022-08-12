@@ -1,0 +1,94 @@
+//+------------------------------------------------------------------+
+//|                                                 VerificaTPSL.mq5 |
+//|                                  Copyright 2020, Lauro Cerqueira |
+//|                    https://www.mql5.com/pt/users/laurorcerqueira |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2020, Lauro Cerqueira"
+#property link      "https://www.mql5.com/pt/users/laurorcerqueira"
+#property version   "1.00"
+
+ulong  ticket_comentario_SL_antigo;
+ulong  ticket_comentario_TP_antigo;
+double magicNumber = 123456789;
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+//---
+   
+//---
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+//---
+   
+  }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+//---
+    VerificaSLTP(); 
+  }
+//+------------------------------------------------------------------+
+void VerificaSLTP()
+
+{     
+   MqlDateTime  inicio_dia;
+   datetime hora_atual = TimeCurrent(inicio_dia);
+   inicio_dia.hour = 0;
+   inicio_dia.min = 0;
+   inicio_dia.sec = 0;
+   string verifcacao;
+   ulong DealNumero=0;
+   int comentario;
+   bool VerifSL= false, VerifTP=false;
+   
+      HistorySelect(StructToTime(inicio_dia), hora_atual);
+      
+     for(int i = HistoryDealsTotal() - 1; i >= 0; i--)
+     { 
+       DealNumero = HistoryDealGetTicket(i); // index do último negocio e armazena em ticket
+          
+      if(HistoryDealGetString(DealNumero , DEAL_SYMBOL) == string(_Symbol))
+      //&&PositionGetInteger(POSITION_MAGIC) == magicNumber)
+      { 
+      if((HistoryDealGetInteger(DealNumero,DEAL_ENTRY)==DEAL_ENTRY_OUT))
+      { comentario  = HistoryDealGetInteger(DealNumero,DEAL_REASON);
+         if(comentario == 4)
+            { VerifSL = true; 
+               break;}
+      }
+     }
+    }
+    if(VerifSL){
+    if(DealNumero!=ticket_comentario_SL_antigo){
+     ticket_comentario_SL_antigo=DealNumero; 
+       Print(EnumToString((ENUM_DEAL_REASON)comentario)," ",ticket_comentario_SL_antigo);
+       }}
+     
+     for(int i = HistoryDealsTotal() - 1; i >= 0; i--){
+      DealNumero = HistoryDealGetTicket(i); // index do último negocio e armazena em ticket  
+      if(HistoryDealGetString(DealNumero , DEAL_SYMBOL) == string(_Symbol)){
+      //&&PositionGetInteger(POSITION_MAGIC) == magicNumber) 
+      if((HistoryDealGetInteger(DealNumero,DEAL_ENTRY)==DEAL_ENTRY_OUT)){ 
+      comentario  = HistoryDealGetInteger(DealNumero,DEAL_REASON);
+      if(comentario == 5){
+        VerifTP= true;
+        break;
+      }
+     }
+    }
+   }
+    if (VerifTP){
+    if(DealNumero!=ticket_comentario_TP_antigo){
+       ticket_comentario_TP_antigo=DealNumero;
+       Print(EnumToString((ENUM_DEAL_REASON)comentario)," ",ticket_comentario_SL_antigo);
+       }}
+ }

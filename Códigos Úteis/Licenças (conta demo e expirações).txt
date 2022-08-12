@@ -1,0 +1,37 @@
+Licenças (conta demo e expirações) - colocar na OnInit():
+   bool     prototipo=true;               // true só roda em demo, false conta real
+   long         account=1783;                 // Account login
+   long     periodo_licenca=60;           // Qtd dias licença
+   
+   datetime dt_expiracao=__DATE__+PeriodSeconds(PERIOD_D1)*periodo_licenca;                   // Data de expiração
+
+   ENUM_ACCOUNT_TRADE_MODE tradeMode=(ENUM_ACCOUNT_TRADE_MODE)AccountInfoInteger(ACCOUNT_TRADE_MODE);
+
+   if(prototipo)
+     {
+      if(tradeMode==ACCOUNT_TRADE_MODE_REAL)
+        {
+         Alert(__FUNCTION__,": Licença somente para conta DEMO");
+         return(INIT_FAILED);
+        }
+      dt_expiracao=__DATE__+PeriodSeconds(PERIOD_D1)*5; // Expira 5 dias após a compilação
+      if(TimeCurrent()>dt_expiracao)
+        {
+         Alert(__FUNCTION__,": licença DEMO expirada");
+         return(INIT_FAILED);
+        }
+     }
+
+   if(!prototipo)
+     {
+      if(AccountInfoInteger(ACCOUNT_LOGIN)!=account)
+        {
+         Alert(__FUNCTION__,": Login não autorizado");
+         return(INIT_FAILED);
+        }
+      if(TimeCurrent()>dt_expiracao)
+        {
+         Alert(__FUNCTION__,": Licença expirada");
+         return(INIT_FAILED);
+        }
+     }

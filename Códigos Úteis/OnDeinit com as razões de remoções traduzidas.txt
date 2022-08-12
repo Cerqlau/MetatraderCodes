@@ -1,0 +1,40 @@
+OnDeinit com as razões de remoções traduzidas.
+
+void OnDeinit(const int reason)
+{
+  //Motivo do robo ter saido
+   switch(reason)
+     {
+      case 0:
+         Print("ATENÇÃO: Motivo de remoção: O Expert Advisor terminou sua operação chamando a função ExpertRemove().");
+         break;
+      case 1:
+         Print("ATENÇÃO: Motivo de remoção: O robo foi excluído do gráfico.");
+         break;
+      case 2: 
+         Print("ATENÇÃO: Motivo de remoção: O robo foi recompilado.");
+         break;
+      case 3: 
+         Print("ATENÇÃO: Motivo de remoção: O período do símbolo ou gráfico foi alterado.");;
+         break;
+      case 4:
+         Print("ATENÇÃO: Motivo de remoção: O gráfico foi encerrado.");
+         break;
+      case 5:
+         Print("ATENÇÃO: Motivo de remoção: Os parâmetros de entrada foram alterados pelo usuário.");
+         break;
+      case 6:
+         Print("ATENÇÃO: Motivo de remoção: Outra conta foi ativada ou o servidor de negociação foi reconectado devido a alterações nas configurações de conta.");
+         break;
+      case 7:
+         Print("ATENÇÃO: Motivo de remoção: Um novo modelo foi aplicado.");
+         break;
+      case 8:
+         Print("ATENÇÃO: Motivo de remoção: O manipulador OnInit() retornou um valor diferente de zero.");
+         break;
+      case 9:
+         Print("ATENÇÃO: Motivo de remoção: Terminal foi fechado.");
+         break;
+      default:
+         Print("ATENÇÃO: Motivo de remoção: Desconhecido.");
+     }

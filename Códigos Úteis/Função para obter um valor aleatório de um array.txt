@@ -1,0 +1,10 @@
+Função para obter um valor aleatório de um array: 
+
+template <typename T>
+T ArrayRand(T &array[])
+{
+   static bool firstRun = true;
+   if (firstRun) srand(GetTickCount());
+   firstRun = false;
+   return array[rand() % ArraySize(array)];
+}

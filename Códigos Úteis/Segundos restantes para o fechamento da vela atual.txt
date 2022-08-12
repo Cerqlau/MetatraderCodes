@@ -1,0 +1,4 @@
+
+   // Segundos para o candle atual fechar
+   int seconds = PeriodSeconds(_Period) - (int(TimeCurrent()) % PeriodSeconds(_Period));
+

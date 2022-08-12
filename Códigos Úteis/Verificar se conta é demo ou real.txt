@@ -1,0 +1,26 @@
+Verificar se conta é demo ou real
+
+
+//--- Tipo de conta
+string ModoDaConta()
+{
+   //Conta demo, de torneio ou real
+   ENUM_ACCOUNT_TRADE_MODE type=(ENUM_ACCOUNT_TRADE_MODE)AccountInfoInteger(ACCOUNT_TRADE_MODE);
+   
+   //Agora transforma o valor da enumeração em uma string
+   string trade_mode;
+   switch(type)
+     {
+      case  ACCOUNT_TRADE_MODE_DEMO:
+         trade_mode="DEMO";
+         break;
+      case  ACCOUNT_TRADE_MODE_CONTEST:
+         trade_mode="CONCURSO";
+         break;
+      default:
+         trade_mode="REAL";
+         break;
+     }
+
+   return trade_mode;
+}

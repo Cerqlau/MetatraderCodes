@@ -1,0 +1,26 @@
+
+//--- Não abrir mais de uma operação no mesmo candle
+void OnTick(void)
+{   
+   bool candle_traded = false; // Criar esta variável como variável global
+  
+   if(IsNewBar()) // Função IsNewBar() está apresentada acima no canal #códigos-úteis
+      candle_traded = false;
+      
+   // Condição de compra aqui
+   if(condicao_de_compra && !candle_traded)
+     {
+      candle_traded = true;
+      
+      // Enviar compra aqui
+     }
+     
+   // Condição de venda aqui
+   if(condicao_de_venda && !candle_traded)
+     {
+      candle_traded = true;
+      
+      // Enviar venda aqui
+     }
+}
+

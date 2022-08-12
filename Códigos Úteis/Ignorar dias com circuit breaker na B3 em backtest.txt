@@ -1,0 +1,36 @@
+void OnTick()
+{   
+   if (CircuitBrakerB3())
+      return;
+
+   //...
+
+}
+
+
+bool CircuitBrakerB3()
+{
+   if(MQLInfoInteger(MQL_TESTER)) 
+   {
+      string symb = SymbolInfoString(_Symbol, SYMBOL_PATH);
+      if ((StringFind(symb,"BOVESPA") != -1) || (StringFind(symb,"BMF") != -1))
+      {
+         MqlDateTime dt_bar = {0};
+         ResetLastError();
+         TimeToStruct(iTime(_Symbol, _Period, 0), dt_bar);        
+         if (GetLastError() == 0)
+         {
+            if ((dt_bar.day == 18) && dt_bar.mon == 05 && dt_bar.year == 2017)
+                return true;
+            
+            if (dt_bar.mon == 03 && dt_bar.year == 2020)
+            {
+               if (  (dt_bar.day == 09) || (dt_bar.day == 11) || (dt_bar.day == 12) || (dt_bar.day == 13) || 
+                     (dt_bar.day == 16) || (dt_bar.day == 18) || (dt_bar.day == 20) || (dt_bar.day == 24)  )
+                  return true;
+            }
+         }
+      }
+   }
+   return false;
+}

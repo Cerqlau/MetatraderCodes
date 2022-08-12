@@ -1,0 +1,137 @@
+//+------------------------------------------------------------------+
+//|  SAIDAS PARCIAIS                                                 |
+//+------------------------------------------------------------------+
+void SaidaParcial(string pos, double lastprice, int numSaida)
+{
+   double volume = 0;
+   double PrecoFutSaidas = 0;
+
+
+   //Saidas a FAVOR e posicao POSITIVA
+   if(ExitPartial == 1 && PosicaoInfo.Profit()>0)
+   {
+      if(pos=="Comprado")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = ExitVolume;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance;
+               break;
+            case 2:
+               volume = ExitVolume2;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance + ExitDistance2;
+               break;
+            case 3:
+               volume = ExitVolume3;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance + ExitDistance2 + ExitDistance3;
+               break;
+            }
+      
+         //Last acima do preço futuro
+         if(lastprice >= PrecoFutSaidas )
+           {
+            if(Venda(volume, "Comprado: Saida a FAVOR"))
+               {
+                  SaidasFeitas += 1;
+               }
+           }
+      }
+
+      if(pos=="Vendido")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = ExitVolume;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance;
+               break;
+            case 2:
+               volume = ExitVolume2;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance - ExitDistance2;
+               break;
+            case 3:
+               volume = ExitVolume3;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance - ExitDistance2 - ExitDistance3;
+               break;
+            }
+      
+         //Last abaixo do preço futuro
+         if(lastprice <= PrecoFutSaidas )
+           {
+            if(Compra(volume, "Vendido: Saida a FAVOR"))
+               {
+                  SaidasFeitas += 1;
+               }
+           }
+      }
+
+   }//Fim do A FAVOR
+
+
+
+
+
+   //Saidas CONTRA e posicao NEGATIVA
+   if(ExitPartial == 0 && PosicaoInfo.Profit()<0)
+   {
+      if(pos=="Comprado")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = ExitVolume;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance;
+               break;
+            case 2:
+               volume = ExitVolume2;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance - ExitDistance2;
+               break;
+            case 3:
+               volume = ExitVolume3;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() - ExitDistance - ExitDistance2 - ExitDistance3;
+               break;
+            }
+      
+         //Last abaixo do preço futuro
+         if(lastprice <= PrecoFutSaidas )
+           {
+            if(Venda(volume, "Comprado: Saida CONTRA"))
+               {
+                  SaidasFeitas += 1;
+               }
+           }
+      }
+
+      if(pos=="Vendido")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = ExitVolume;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance;
+               break;
+            case 2:
+               volume = ExitVolume2;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance + ExitDistance2;
+               break;
+            case 3:
+               volume = ExitVolume3;
+               PrecoFutSaidas = PosicaoInfo.PriceOpen() + ExitDistance + ExitDistance2 + ExitDistance3;
+               break;
+            }
+      
+         //Last acima do preço futuro
+         if(lastprice >= PrecoFutSaidas )
+           {
+            if(Compra(volume, "Vendido: Saida CONTRA"))
+               {
+                  SaidasFeitas += 1;
+               }
+           }
+      }
+
+   }//Fim do CONTRA
+
+
+}

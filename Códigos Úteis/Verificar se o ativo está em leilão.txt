@@ -1,0 +1,19 @@
+void InformacaoPreco()
+{
+if(!MQLInfoInteger(MQL_TESTER))
+  {
+  if(SymbolInfoTick(_Symbol,tick)==true)
+  {
+   double   bid = tick.bid;
+   double   ask = tick.ask;
+     //--
+   if(bid == 0 || ask == 0) //Cotacoes zeradas
+   {  
+      Print("As cotações estão zeradas");
+      }
+   if(bid >= ask) //Leilão
+   {  
+       Print("O Ativo atual está em leilão");
+     }
+  }}
+} 

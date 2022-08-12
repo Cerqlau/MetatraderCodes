@@ -1,0 +1,29 @@
+Correção dos níveis de SL e TP após entrar em operação. Utilizado no OnTick. SL e TP são variáveis de input.
+
+void corrigeStopsSePossivel()
+{  
+   double preco_abertura = PositionGetDouble(POSITION_PRICE_OPEN);
+   ulong position_ticket = PositionGetInteger(POSITION_TICKET);     
+   double posicao_aberta_sl = PositionGetDouble(POSITION_SL);
+   double posicao_aberta_tp = PositionGetDouble(POSITION_TP);     
+   if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY)
+   {
+      double stoploss = simbolo.NormalizePrice(preco_abertura - SL);
+      double takeprofit = simbolo.NormalizePrice(preco_abertura + TP);  
+      if (posicao_aberta_sl != stoploss || posicao_aberta_tp != takeprofit)
+      {
+         negocio.PositionModify(position_ticket,stoploss,takeprofit);
+         Print("[Operação comprado] Corrigindo stop loss e stop gain da operação que está em aberto!");
+      }      
+   }
+   else if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL)
+   {
+      double stoploss = simbolo.NormalizePrice(preco_abertura + SL);
+      double takeprofit = simbolo.NormalizePrice(preco_abertura - TP);  
+      if (posicao_aberta_sl != stoploss || posicao_aberta_tp != takeprofit)
+      {
+         negocio.PositionModify(position_ticket,stoploss,takeprofit);
+         Print("[Operação vendido] Corrigindo stop loss e stop gain da operação que está em aberto!");
+      }   
+   }
+}

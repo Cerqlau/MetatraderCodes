@@ -1,0 +1,99 @@
+//+------------------------------------------------------------------+
+//|                                           Telegram_Signal_EA.mq5 |
+//|                        Copyright 2014, MetaQuotes Software Corp. |
+//|                                              http://www.mql5.com |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2014, MetaQuotes Software Corp."
+#property link      "http://www.mql5.com"
+#property version   "1.00"
+#property strict
+
+#include <Meus Includes/Telegram/Telegram.mqh>
+
+//--- input parameters
+input string NomeDoCanal = ""; //Channel Name  https://t.me/ voçe cola o que vem depois do me/ 
+input string TokenDoBot = ""; //Token
+
+//--- global variables
+CCustomBot bot;
+
+bool checked;
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   bot.Token(TokenDoBot);
+
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   if(reason == REASON_PARAMETERS ||
+      reason == REASON_RECOMPILE ||
+      reason == REASON_ACCOUNT)
+     {
+      checked = false;
+     }
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam)
+  {
+   if(id == CHARTEVENT_KEYDOWN &&
+      lparam == 'Q')
+     {
+
+      bot.SendMessage(NomeDoCanal, "Teste");
+     }
+  }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+
+   if(!checked)
+     {
+      if(StringLen(NomeDoCanal) == 0)
+        {
+         Print("Erro : Nome Do Grupo Ou Canal Vazio");
+         Sleep(10000);
+         return;
+        }
+
+      int result = bot.GetMe();
+      if(result == 0)
+        {
+         Print("Nome Do Bot: ", bot.Name());
+         checked = true;
+        }
+      else
+        {
+         Print("Erro: ", GetErrorDescription(result));
+         Sleep(10000);
+         return;
+        }
+     }
+
+//--- Envio Sinal
+      string msg =     "  Estrategia ---> PriceAction "+
+                  "\n"+"  Ativo      ---> "+_Symbol+
+                  "\n"+"  Preço      ---> "+DoubleToString(SymbolInfoDouble(_Symbol,SYMBOL_LAST),_Digits)+
+                  "\n"+"  Direção    ---> Compra";
+                                
+                                
+      int res = bot.SendMessage(NomeDoCanal, msg);
+      if(res != 0)
+         Print("Error: ", GetErrorDescription(res));
+      Sleep(100);
+
+
+  }
+
+//+------------------------------------------------------------------+

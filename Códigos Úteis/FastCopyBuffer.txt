@@ -1,0 +1,36 @@
+
+
+
+int FastCopyBuffer(int       handle,
+                   int       buffer_num,
+                   const int rates_total,
+                   const int prev_calculated,
+                   double    &buffer[])
+{
+   int count  = rates_total - prev_calculated;
+   count = prev_calculated == 0 ? count : count + 1;
+   ResetLastError();
+   int copied = CopyBuffer(handle, buffer_num, 0, count, buffer);
+   if (copied == -1)
+   {
+      PrintFormat("Error code %d in CopyBuffer!", GetLastError());
+   }
+   return copied;
+}
+
+//Exemplo de uso em OnCalculate()
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+{
+   int copied = FastCopyBuffer(iMAHandle, 0, rates_total, prev_calculated, iMABuffer);
+   if (copied == -1) return 0;
+
+   return(rates_total);

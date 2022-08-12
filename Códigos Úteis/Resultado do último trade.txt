@@ -1,0 +1,36 @@
+
+
+void ResultadoUltimoTrade(ulong numero_magico)
+  {
+   datetime inicio, fim;
+   double resultado;
+   ulong ticket;
+
+   //Obtenção do Histórico
+   MqlDateTime inicio_struct;
+   fim = TimeCurrent(inicio_struct);
+   inicio_struct.hour = 0;
+   inicio_struct.min  = 0;
+   inicio_struct.sec  = 0;
+   inicio = StructToTime(inicio_struct);
+   HistorySelect(inicio, fim);
+
+
+   for(int i=HistoryDealsTotal()-1; i>=0; i--)
+     {
+      ticket = HistoryDealGetTicket(i);
+      if(ticket > 0)
+        {
+         if(HistoryDealGetString(ticket, DEAL_SYMBOL) == _Symbol
+            && HistoryDealGetInteger(ticket, DEAL_MAGIC) == numero_magico)
+           {
+            resultado = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+            Print("Resultado: ", resultado);
+            break;
+           }
+        }
+     }
+  }
+
+
+

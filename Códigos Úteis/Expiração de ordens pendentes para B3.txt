@@ -1,0 +1,35 @@
+//+------------------------------------------------------------------+
+//| Expiração de ordens pendentes para B3                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+
+//--- Time_Last_Pending - variável global do tipo datetime
+//--- Time_Experation_Pending_Orders - variável global do tipo int. Armazena o tempo de expiração em segundos
+
+   if(buy)
+     {
+      //--- ##### envio da ordem pendente de compra aqui
+      Time_Last_Pending=TimeCurrent();
+     }
+   if(sell)
+     {
+      //--- ##### envio da ordem pendente de venda aqui
+      Time_Last_Pending=TimeCurrent();
+     }
+
+   if(Time_Experation_Pending_Orders > 0) //Verifica se a funçao vai ser usada
+     {
+      if(Time_Last_Pending+Time_Experation_Pending_Orders <=TimeCurrent())// checa se o tempo de envio mais o tempo de validade é menor que ou igual ao time atual
+        {
+         while(OrdersTotal() > 0) //enquanto tiver ordens pendetes fica no loop
+           {
+            //--- ##### função removendo ordens pendentes aqui
+           }
+        }
+     }
+  }
+//+------------------------------------------------------------------+
+
+
+

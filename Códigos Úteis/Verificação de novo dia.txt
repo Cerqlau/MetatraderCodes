@@ -1,0 +1,22 @@
+Verificação de novo dia
+
+
+//Colar no Global
+uint           diaAtual = 0;
+
+//Colar no final do codigo.
+bool NovoDia()
+{
+   //Atibuo uma estrutura de tempo
+   MqlDateTime    datas;
+   TimeCurrent(datas);
+   
+   if(datas.day!=diaAtual)
+     {
+      Print("Novo dia detectado!", " ", "Novo dia: ", datas.day);
+      diaAtual = datas.day;
+      return true;
+     }
+   return false;
+}
+

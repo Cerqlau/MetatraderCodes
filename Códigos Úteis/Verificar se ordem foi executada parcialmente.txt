@@ -1,0 +1,40 @@
+input long  MagicN = 1234;
+
+CPositionInfo  posicao;
+
+void OnTick()
+{
+   //---
+   
+   bool pos = posicao.SelectByMagic(_Symbol, MagicN);
+   
+   if (pos)
+      if (IsPartial(_Symbol, posicao.Ticket(), MagicN))
+      {
+         //---
+      }
+      
+   //---
+   
+}
+
+bool IsPartial(string symbol, ulong position_ticket, long m_magic)
+{
+   int total = OrdersTotal();
+   for(int i = total - 1; i >= 0; i--)
+   {
+      ulong   ticket = OrderGetTicket(i);
+      
+      string _symbol = OrderGetString(ORDER_SYMBOL);
+      ulong  _magic  = OrderGetInteger(ORDER_MAGIC);
+      
+      if ((symbol == _symbol) && (m_magic == _magic))
+      {
+         ulong p_ticket = OrderGetInteger(ORDER_POSITION_ID);
+         if ((position_ticket == p_ticket) && (OrderGetInteger(ORDER_STATE) == ORDER_STATE_PARTIAL)) 
+            return true;
+      }
+   }
+   
+   return false;
+}

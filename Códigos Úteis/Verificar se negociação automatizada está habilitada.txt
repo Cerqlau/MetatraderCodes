@@ -1,0 +1,10 @@
+Verificar se negociação automatizada está habilitada
+
+
+//+------------------------------------------------------------------+
+//| Valida se o botão de TRADE do MT5 esta habilitado             |
+//+------------------------------------------------------------------+
+bool CheckBotaoTradeTerminal()
+{
+   return TerminalInfoInteger(TERMINAL_TRADE_ALLOWED));
+}

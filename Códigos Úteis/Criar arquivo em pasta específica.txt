@@ -1,0 +1,38 @@
+Criar arquivo em pasta específica 
+
+#include  <Files\FileTxt.mqh>
+
+CFileTxt  filetxt;
+//+------------------------------------------------------------------
+//| Script initialization function                                   
+//+------------------------------------------------------------------
+int OnStart()
+   {
+    bool criar = true;
+    ResetLastError();
+    if(!FileIsExist("Pasta Teste"))
+        if(GetLastError() ==  5018)
+            criar = false;
+    if(criar)
+       {
+        if(FolderCreate(Pasta Teste))
+           Print("Pasta Criada");
+       }
+    else
+       Print("Pasta Ja Existe");
+       
+
+
+    if(!FileIsExist("Pasta Teste//Arquivo.txt"))
+       {
+        Print("Criar Arquivo.txt");
+        filetxt.Open("Pasta Teste//Arquivo.txt", FILE_WRITE | FILE_TXT);
+
+        filetxt.WriteString("Dados para gravar no arquivo aqui");
+
+        filetxt.Flush();
+        filetxt.Close();
+       }
+    else
+        Print("Arquivo ja existe");
+   }

@@ -1,0 +1,39 @@
+class SmartComment
+{
+   public:
+      SmartComment(int max) : m_max(max){Clear();}
+      ~SmartComment(){Clear();}
+
+      void Print(string text)
+      {
+         Append(text);
+         m_size = ArraySize(m_lines);
+
+         string str = "";
+         for (int i = 0; i < m_size; i++)
+            str += m_lines[i] + (i < m_size - 1 ? "\n" : "");
+         Comment(str);
+      }
+
+      void Clear()
+      {
+         ArrayResize(m_lines, 0);
+         Comment("");
+      }
+
+   private:
+      string m_lines[];
+      int    m_size;
+      int    m_max;
+
+      void Append(string value)
+      {
+         m_size = ArraySize(m_lines);
+         while (ArraySize(m_lines) >= m_max) 
+            ArrayRemove(m_lines, 0, 1);
+         
+         ArrayResize(m_lines, ArraySize(m_lines) + 1);
+         m_lines[ArraySize(m_lines) - 1] = value;
+      }
+};
+

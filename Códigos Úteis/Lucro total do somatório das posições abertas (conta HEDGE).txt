@@ -1,0 +1,17 @@
+
+double LucroPosicao(ulong magic_number)
+  {
+//Declaração de Variáveis
+   double resultado =0;
+
+//Cálculos
+   for(int i=PositionsTotal()-1; i>=0; i--) // Vare o histórico
+     {
+      string simbolo = PositionGetSymbol(i); // Verifica a posição no Simbolo
+      ulong magic = PositionGetInteger(POSITION_MAGIC);  // cria a variável para o numero magico e define ele 
+      if(simbolo==_Symbol && magic==magic_number )  // Verifica o número magico se ele é igual ao do robô que enviou a ordem
+          resultado += PositionGetDouble(POSITION_PROFIT); // Soma todas as posições
+     }
+     return (resultado);
+  } 
+

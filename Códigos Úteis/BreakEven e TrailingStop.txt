@@ -1,0 +1,89 @@
+
+#include <Trade/Trade.mqh>
+#include <Trade/PositionInfo.mqh>
+
+CTrade                 trade;
+CPositionInfo          PosicaoInfo;
+
+input ulong             Magig                                                  =12345;
+// Parametros Trailing Stop
+input double            Trailing_Start                                         =0.0;    // VALOR PARA ATIVAR TRAILING STOP
+input double            Trailing_Step                                          =0.0;    //VALOR PARA SUBIR O STOP MOVEL
+// Parametros Break Even
+input double            Break_Even_Start                                       =0.0;    //DISTANCIA DE PONTOS POSITIVOS NA ORDEM QUE ATIVA O BREAK EVEN
+input double            Break_Even_Step                                        =0.0;    //QUANTOS PONTOS COLOCAR NO POSITIVO A ORDEM (0 = OPEN PRICE)
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   trade.SetExpertMagicNumber(Magig);
+
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+// Nota Chame sempre apos ter enviado as ordens
+   BREAK_EVEN();
+   TRAILING_STOP();
+  }
+//+------------------------------------------------------------------+
+//| Função que executa o Trailing Stop                               |
+//+------------------------------------------------------------------+
+void TRAILING_STOP()
+  {
+   for(int i = 0 ; i < PositionsTotal() ; i++)
+     {
+      if(PosicaoInfo.SelectByIndex(i))
+        {
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && PosicaoInfo.PriceOpen() <= PosicaoInfo.StopLoss() && PosicaoInfo.Magic()==Magig)
+           {
+            if((PosicaoInfo.PriceCurrent() - PosicaoInfo.StopLoss()) >= Trailing_Start*Point())
+              {
+               ulong ticket=PosicaoInfo.Ticket();
+               trade.PositionModify(ticket,(PosicaoInfo.StopLoss() + Trailing_Step*Point()),PosicaoInfo.TakeProfit());
+              }
+           }
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && PosicaoInfo.PriceOpen() >= PosicaoInfo.StopLoss() && PosicaoInfo.Magic()==Magig)
+           {
+            if((PosicaoInfo.StopLoss() - PosicaoInfo.PriceCurrent()) >= Trailing_Start*Point())
+              {
+               ulong ticket=PosicaoInfo.Ticket();
+               trade.PositionModify(ticket,(PosicaoInfo.StopLoss() - Trailing_Step*Point()),PosicaoInfo.TakeProfit());
+              }
+           }
+        }
+     }
+  }
+//+------------------------------------------------------------------+
+//| Função que executa o BreakEven                                   |
+//+------------------------------------------------------------------+
+void BREAK_EVEN()
+  {
+   for(int i = 0 ; i < PositionsTotal() ; i++)
+     {
+      if(PosicaoInfo.SelectByIndex(i))
+        {
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY && PosicaoInfo.Magic()==Magig)
+           {
+            double Diferenca=PosicaoInfo.PriceCurrent() - PosicaoInfo.PriceOpen();
+            if(Diferenca > Break_Even_Start*Point() && PosicaoInfo.StopLoss() < PosicaoInfo.PriceOpen())
+              {
+               trade.PositionModify(PosicaoInfo.Ticket(),PosicaoInfo.PriceOpen()+Break_Even_Step*Point(),PosicaoInfo.TakeProfit());
+              }
+           }
+         if(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_SELL && PosicaoInfo.Magic()==Magig)
+           {
+            double Diferenca=PosicaoInfo.PriceOpen() - PosicaoInfo.PriceCurrent();
+            if(Diferenca > Break_Even_Start*Point() && PosicaoInfo.StopLoss() > PosicaoInfo.PriceOpen())
+              {
+               trade.PositionModify(PosicaoInfo.Ticket(),PosicaoInfo.PriceOpen()-Break_Even_Step*Point(),PosicaoInfo.TakeProfit());
+              }
+           }
+        }
+     }
+  }
+//+------------------------------------------------------------------+

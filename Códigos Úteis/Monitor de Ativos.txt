@@ -1,0 +1,137 @@
+//+------------------------------------------------------------------+
+//|                                            Monitor de Ativos.mq5 |
+//|                                           Samuel Manoel de Souza |
+//|                               Samuelmanoeldesouza@outlook.com.br |
+//+------------------------------------------------------------------+
+#property copyright "Samuel Manoel de Souza"
+#property link      "Samuelmanoeldesouza@outlook.com.br"
+#property version   "1.00"
+#include <Arrays\ArrayInt.mqh>      CArrayInt handle;
+
+int total_ativos;
+double buffer[];
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+//---
+      total_ativos = SymbolsTotal(true);
+      Print("Total de ativos: ",total_ativos);
+      for(int i = 0; i<total_ativos;i++)
+      {
+         Print("Ativo",i," adiciondo: ",SymbolName(i,true));
+      }
+      for(int i = 0; i<total_ativos;i++)
+      {
+         handle.Insert(iCustom(SymbolName(i,true),_Period,"Downloads\\heiken_ashi_smoothed",MODE_EMA,15),i);
+      }
+      ArraySetAsSeries(buffer,true);
+//---
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+//---
+      for(int i = 0; i<total_ativos;i++)
+      {
+         IndicatorRelease(handle.At(i));
+      }
+  }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+//===TRECHO DE CÓDIGO DE ARTIGO EM no site MQL5
+   // Do we have enough bars to work with
+   if(Bars(_Symbol,_Period)<60) // if total bars is less than 60 bars
+     {
+      Alert("We have less than 60 bars, EA will now exit!!");
+      return;
+     }
+// We will use the static Old_Time variable to serve the bar time.
+// At each OnTick execution we will check the current bar time with the saved one.
+// If the bar time isn't equal to the saved time, it indicates that we have a new tick.
+   static datetime Old_Time;
+   datetime New_Time[1];
+   bool IsNewBar=false;
+
+// copying the last bar time to the element New_Time[0]
+   int copied=CopyTime(_Symbol,_Period,0,1,New_Time);
+   if(copied>0) // ok, the data has been copied successfully
+     {
+      if(Old_Time!=New_Time[0]) // if old time isn't equal to new bar time
+        {
+         IsNewBar=true;   // if it isn't a first call, the new bar has appeared
+         if(MQL5InfoInteger(MQL5_DEBUGGING)) Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
+         Old_Time=New_Time[0];            // saving bar time
+        }
+     }
+   else
+     {
+      Alert("Error in copying historical times data, error =",GetLastError());
+      ResetLastError();
+      return;
+     }
+
+//--- EA should only check for new trade if we have a new bar
+   if(IsNewBar==false)
+     {
+      return;
+     }
+
+//--- Do we have enough bars to work with
+   int Mybars=Bars(_Symbol,_Period);
+   if(Mybars<60) // if total bars is less than 60 bars
+     {
+      Alert("We have less than 60 bars, EA will now exit!!");
+      return;
+     }
+//=========================================================================
+  
+      for(int i = 0; i<total_ativos;i++)
+      {
+         SymbolSelect(SymbolName(i,true),true);
+
+         CopyBuffer(handle.At(i),4,0,3,buffer);
+        
+         if(buffer[1] == 0.0 && buffer[2] == 1.0)
+         {
+            Comment("------------>>COMPRA");
+            sinal_compra(i);
+            //fechar posição vendidas
+            //Abrir posição compra
+            //return;
+         }
+         else if(buffer[1] == 1.0 && buffer[2] == 0.0)
+         {
+            Comment("------------->>VENDA");
+            sinal_venda(i);
+            //fechar posições compradas
+            //Abrir posição vendida
+            //return;
+         }
+        
+      }
+  }
+//+------------------------------------------------------------------+
+
+void sinal_compra(int posicao_ativo)
+{
+   string symbol = SymbolName(posicao_ativo,true);
+   PlaySound("expert.wav");
+   //SendMail("Call de Metatrader5",SymbolInfoString(_Symbol,SYMBOL_DESCRIPTION));
+   Print("Call de Compra MT5\n",symbol,SymbolInfoString(symbol,SYMBOL_DESCRIPTION),"\n",SymbolInfoDouble(symbol,SYMBOL_LAST));
+}
+
+void sinal_venda(int posicao_ativo)
+{
+   string symbol = SymbolName(posicao_ativo,true);
+   PlaySound("timeout.wav");
+   //SendMail("Call de Metatrader5",SymbolInfoString(_Symbol,SYMBOL_DESCRIPTION));
+   Print("Call de Venda MT5\n",symbol,SymbolInfoString(symbol,SYMBOL_DESCRIPTION),"\n",SymbolInfoDouble(symbol,SYMBOL_LAST));

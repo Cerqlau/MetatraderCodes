@@ -1,0 +1,251 @@
+//+------------------------------------------------------------------+
+//|                                         Online Pricing Panel.mq5 |
+//|                                    Copyright 2020, Samuel Kruger |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2020, Samuel Kruger"
+#property link      "samkruger@yahoo.com.br"
+#property version   "1.00"
+#property indicator_chart_window
+#property indicator_plots 0
+input int nrSymbols=10;                       // Number of symbols to display on the panel - 3 to 10 (not tested with more)
+input int yMove=0;                            // Vertical panel attachment point - 0 fixes the panel at the top
+input string SymbolsNames = "AZUL4;BTOW3;BPAC11;ELET3;GOLL4;ITUB4;RENT3;PETR4;PRIO3;VVAR3";
+input color  FontColorName=clrSkyBlue;        // Font color of the symbols name and its values
+input color  FontColorPositive=clrLimeGreen;  // Font color of positive changes
+input color  FontColorNegative=clrRed;        // Font color of negative changes
+input color  FontColorZero=clrYellow;         // Font color when there is no change
+input color  BackgroundColor=C'4,7,4';        // Background color
+input color  BackgroundTitle=C'7,70,7';       // Background title color
+input color  BorderColor=clrWhite;            // Border color
+string resultSymbols[];
+//+------------------------------------------------------------------+
+//| Custom indicator OnInit function                                 |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   if(InitialCheck())
+     {
+      GetSymbols();
+      SetPanel();
+      return(INIT_SUCCEEDED);
+     }
+   else
+      return(INIT_FAILED);
+  }
+//+------------------------------------------------------------------+
+//| Deinitialization function                                        |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   DeletePanel();
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator OnCalculate function                            |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total, const int prev_calculated, const datetime &time[], const double &open[],
+                const double &high[], const double &low[], const double &close[], const long &tick_volume[],
+                const long &volume[], const int &spread[])
+  {
+   SetPanel();  // Updates the panel every tick
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Setting the panel                                           |
+//|------------------------------------------------------------------+
+void SetPanel()
+  {
+   int    uprightPosHeader=21+yMove;    // Upright position for the background and header
+   int    uprightPosList=46+yMove;      // Upright position for the values list
+   int    lineHeight=19;                // Line height
+   int    heightBase=12;                // Base panel height
+   int    heightPanel=heightBase+(19*(nrSymbols+1));     // Panel height adjusted to number of symbols
+   int    widthPanel=168;               // Width panel
+//---
+   int    fontSizeNm=11;            // Font size of Names
+   int    fontSizeValues=10;        // Font size of values
+   string fontNameTitle="Calibri";  // Font name of panel title
+   string fontName="Calibri";       // Font name of symbols list
+   color  fontColorPerc;  // Font color of percents. The color depends on the percentage of variation
+//---
+   ENUM_ANCHOR_POINT anchor=ANCHOR_LEFT_UPPER;
+   ENUM_BASE_CORNER  corner=CORNER_LEFT_UPPER;
+   ENUM_ANCHOR_POINT anchor1=ANCHOR_LEFT_UPPER;
+//--- Margins distance
+   int    margCol01=8;    // First column margin distance
+   int    margCol02=70;   // Second column margin distance
+   int    margCol03=122;  // Third column margin distance
+
+//--- Array of upright align and respective values
+   int upright[];   // upright position
+   ArrayResize(upright,nrSymbols);
+//--- Fill the array in the position for each line
+   for(int y=0; y<nrSymbols; y++)
+      upright[y]=uprightPosList+(lineHeight*y);
+//--- Panel background
+   CreateEdit("PanelBackground","",corner,fontName,10,clrWhite,widthPanel,heightPanel,0,uprightPosHeader,BackgroundColor,BorderColor);
+//--- Panel header
+   CreateEdit("PanelHeader","                              INDEXES",corner,fontNameTitle,8,clrWhite,widthPanel,18,0,uprightPosHeader,BackgroundTitle,BorderColor);
+
+//--- List of symbol names and respective values
+   for(int i=0; i<nrSymbols; i++)
+     {
+      string symb;
+      char nrDigts;
+      symb = resultSymbols[i];
+
+      if(resultSymbols[i]=="IBOV")
+         nrDigts=0;
+      else
+         nrDigts=2;  // IBOV is the index of the São Paulo stock exchange. As the number is quite large, it omits the decimals.
+      double closeNow=iClose(symb,PERIOD_M1,0);      // actual price
+      double closeLastDay=iClose(symb,PERIOD_D1,1);     // last session close price
+      double varPrc;
+      if(closeNow !=0 && closeLastDay !=0)
+         varPrc = NormalizeDouble(((closeNow / closeLastDay) -1) * 100,2);
+      //--- Font color to percents
+      if(varPrc > 0)
+         fontColorPerc = FontColorPositive;  // if greater than zero
+      else
+         if(varPrc < 0)
+            fontColorPerc = FontColorNegative;        // if less than zero
+         else
+            fontColorPerc = FontColorZero;  // if equal to zero
+      //--- Create symbols labels and respective values
+      CreateLabel(resultSymbols[i],symb,anchor,corner,ALIGN_LEFT,fontName,fontSizeNm,FontColorName,margCol01,upright[i]);
+      CreateLabel(resultSymbols[i]+"Val",DoubleToString(closeNow,nrDigts),anchor1,corner,ALIGN_RIGHT,fontName,fontSizeValues,FontColorName,margCol02,upright[i]);
+      CreateLabel(resultSymbols[i]+"Prc",DoubleToString(varPrc,2)+"%",anchor1,corner,ALIGN_RIGHT,fontName,fontSizeValues,fontColorPerc,margCol03,upright[i]);
+     }
+   ChartRedraw();
+  }
+//+------------------------------------------------------------------+
+//| Deleting panel                                          |
+//+------------------------------------------------------------------+
+void DeletePanel()
+  {
+   DeleteObjectByName("PanelBackground");   // Delete the panel background
+   DeleteObjectByName("PanelHeader");       // Delete the panel header
+//--- Delete position properties and their values
+   for(int i=0; i<nrSymbols; i++)
+     {
+      //--- Delete each created objects
+      DeleteObjectByName(resultSymbols[i]);
+      DeleteObjectByName(resultSymbols[i]+"Val");
+      DeleteObjectByName(resultSymbols[i]+"Prc");
+     }
+//---
+   ChartRedraw();
+  }
+//+------------------------------------------------------------------+
+//| Creating Edit Object                                             |
+//+------------------------------------------------------------------+
+void CreateEdit(string           name,
+                string           text,
+                ENUM_BASE_CORNER corner,
+                string           fontName,
+                int              fontSize,
+                color            fontColor,
+                int              xSize,
+                int              ySize,
+                int              xDistance,
+                int              yDistance,
+                color            backColor,
+                color            borderColor)
+  {
+   if(ObjectCreate(0,name,OBJ_EDIT,0,0,0))
+     {
+      //--- Set de object properties
+      ObjectSetString(0,name,OBJPROP_TEXT,text);
+      ObjectSetInteger(0,name,OBJPROP_CORNER,corner);
+      ObjectSetString(0,name,OBJPROP_FONT,fontName);
+      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,fontSize);
+      ObjectSetInteger(0,name,OBJPROP_COLOR,fontColor);
+      ObjectSetInteger(0,name,OBJPROP_BGCOLOR,backColor);
+      ObjectSetInteger(0,name,OBJPROP_XSIZE,xSize);
+      ObjectSetInteger(0,name,OBJPROP_YSIZE,ySize);
+      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,xDistance);
+      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,yDistance);
+      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+      ObjectSetInteger(0,name,OBJPROP_READONLY,true);
+      ObjectSetInteger(0,name,OBJPROP_ALIGN,ALIGN_LEFT);
+      ObjectSetInteger(0,name,OBJPROP_BORDER_COLOR,borderColor);
+     }
+  }
+//+------------------------------------------------------------------+
+//| Creating Label Object                                            |
+//+------------------------------------------------------------------+
+void CreateLabel(string             name,
+                 string             text,
+                 ENUM_ANCHOR_POINT  anchor,
+                 ENUM_BASE_CORNER   corner,
+                 ENUM_ALIGN_MODE    align,
+                 string             fontName,
+                 int                fontSize,
+                 color              fontColor,
+                 int                xDistance,
+                 int                yDistance)
+  {
+   if(ObjectCreate(0,name,OBJ_LABEL,0,0,0))
+     {
+      //--- Set de object properties
+      ObjectSetString(0,name,OBJPROP_TEXT,text);
+      ObjectSetString(0,name,OBJPROP_FONT,fontName);
+      ObjectSetInteger(0,name,OBJPROP_COLOR,fontColor);
+      ObjectSetInteger(0,name,OBJPROP_ANCHOR,anchor);
+      ObjectSetInteger(0,name,OBJPROP_CORNER,corner);
+      ObjectSetInteger(0,name,OBJPROP_FONTSIZE,fontSize);
+      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,xDistance);
+      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,yDistance);
+      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+      ObjectSetInteger(0,name,OBJPROP_ALIGN,align);
+      ObjectSetInteger(0,name,OBJPROP_BGCOLOR,clrDarkGreen);
+     }
+  }
+//+------------------------------------------------------------------+
+//| Deleting the object by name                                      |
+//+------------------------------------------------------------------+
+void DeleteObjectByName(string name)
+  {
+   int  subWindow = 0;
+   bool result        = false;
+   subWindow=ObjectFind(ChartID(),name);  //--- Find the object by name
+   if(subWindow>=0)
+     {
+      result=ObjectDelete(ChartID(),name);  //--- Delete object by name
+      if(!result)
+         Print("Error when deleting the object: ("+IntegerToString(GetLastError())+"): +ErrorDescription(GetLastError())");
+     }
+  }
+//+------------------------------------------------------------------+
+//| Get Symbols                                                      |
+//+------------------------------------------------------------------+
+void GetSymbols()
+  {
+   ushort sep=StringGetCharacter(";",0);
+   ArrayResize(resultSymbols,nrSymbols+2);
+   string array_source[];
+   int k=StringSplit(SymbolsNames,sep,array_source);
+   resultSymbols[0]="IBOV";               //Defines array position 0 as IBOV
+   resultSymbols[1]=_Symbol;              //Defines array position 1 as current symbol
+   int i=2;
+   for(int j=0; j<nrSymbols; j++)  //Defines other positions of the array
+     {
+      string nameSymbol = array_source[j];
+      if((nameSymbol!=_Symbol) && (nameSymbol!="IBOV"))
+        {
+         resultSymbols[i]=nameSymbol;
+         i++;
+        }
+     }
+   ArrayPrint(resultSymbols);
+  }
+//+------------------------------------------------------------------+
+//| Initial Checks                                                   |
+//+------------------------------------------------------------------+
+bool InitialCheck()   // This function needs to be improved for better checks
+  {
+   bool result=false;
+   if(StringLen(SymbolsNames)>7)
+      result=true;
+   return(result);
+  }
+//+------------------------------------------------------------------+

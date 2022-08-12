@@ -1,0 +1,47 @@
+Funções para obter o valor do spread em ticks e checar spread mínimo
+
+double GetTickSpread(string symbol=NULL)
+{
+   MqlTick tick;
+   SymbolInfoTick(symbol, tick);
+   double tick_size = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
+   return round(fabs(tick.ask - tick.bid) / tick_size) * tick_size;
+}
+
+bool GetTickSpread(double &spread, double min_spread=0, string symbol=NULL)
+{
+   MqlTick tick;
+   SymbolInfoTick(symbol, tick);
+   double tick_size = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
+   spread           = round(fabs(tick.ask - tick.bid) / tick_size) * tick_size;
+   min_spread       = round(min_spread / tick_size) * tick_size;
+   return spread <= (min_spread > 0 ? min_spread : tick_size);
+}
+
+bool IsMinimumTickSpread(double min_spread=0, string symbol=NULL)
+{
+   MqlTick tick;
+   SymbolInfoTick(symbol, tick);
+   double tick_size = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
+   double spread    = round(fabs(tick.ask - tick.bid) / tick_size) * tick_size;
+   min_spread       = round(min_spread / tick_size) * tick_size;
+   return spread <= (min_spread > 0 ? min_spread : tick_size);
+}
+
+//Uso:
+double spread = GetTickSpread();
+
+//Ou:
+double spread;
+bool is_minimum_spread = GetTickSpread(spread);
+if (is_minimum_spread)
+{
+   trade.BuyLimit(...);
+}
+
+//Ou ainda:
+if (IsMinimumTickSpread())
+{
+   trade.BuyLimit(...);
+}
+

@@ -1,0 +1,68 @@
+ 
+void ResumoOperacoes(ulong numero_magico) {
+
+//Declaração de Variáveis
+   datetime inicio, fim;
+   double lucro = 0, perda = 0;
+   int contador_trades = 0;
+   int contador_ordens = 0;
+   double resultado;
+   ulong ticket;
+
+
+   //Obtenção do Histórico
+   MqlDateTime inicio_struct;
+   fim = TimeCurrent(inicio_struct);
+   inicio_struct.hour = 0;
+   inicio_struct.min = 0;
+   inicio_struct.sec = 0;
+   inicio = StructToTime(inicio_struct);
+
+   HistorySelect(inicio, fim);
+
+   //Cálculos
+   for(int i=0; i<HistoryDealsTotal(); i++)
+   {
+      ticket = HistoryDealGetTicket(i);
+      long Entry  = HistoryDealGetInteger(ticket, DEAL_ENTRY);
+
+      if(ticket > 0)
+      {
+         if(HistoryDealGetString(ticket, DEAL_SYMBOL) == _Symbol && HistoryDealGetInteger(ticket, DEAL_MAGIC) == numero_magico)
+         {
+            contador_ordens++;
+            resultado = HistoryDealGetDouble(ticket, DEAL_PROFIT);
+
+            if(resultado < 0)
+            {
+               perda += -resultado;
+            }
+            else
+            {
+               lucro += resultado;
+            }
+
+            if(Entry == DEAL_ENTRY_OUT)
+            {
+               contador_trades++;
+            }
+         }
+      }
+   }
+
+   double fator_lucro;
+
+   if(perda > 0)
+   {
+      fator_lucro = lucro/perda;
+   }
+   else
+      fator_lucro = -1;
+
+   double resultado_liquido = lucro - perda;
+
+
+   //Exibição
+   Print("RESUMO: Trades: ", contador_trades, ", Ordens: ", contador_ordens, ", Lucro: R$ ", DoubleToString(lucro, 2), ", Perdas: R$ ", DoubleToString(perda, 2), 
+   ", Resultado: R$ ", DoubleToString(resultado_liquido, 2), ", FatorDeLucro: ", DoubleToString(fator_lucro, 2));
+}

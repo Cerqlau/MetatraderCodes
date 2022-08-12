@@ -1,0 +1,66 @@
+input long  MagicN = 1234;
+
+CTrade         negocio;
+CPositionInfo  posicao;
+bool           InseriuParcial = false;
+
+
+void OnTrade()
+{
+   ExpiringOrdersPartial(_Symbol, MagicN);
+}
+
+
+void OnTick()
+{   
+   //....
+   
+   bool pos = posicao.SelectByMagic(_Symbol, MagicN);
+   
+   if (pos) && (!InseriuParcial)
+   {
+      string comment = "[part:" + IntegerToString(posicao.Ticket()) + "]"; 
+      if (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_SELL)
+      {
+         negocio.BuyLimit(1.0, simbolo.Last() -500, _Symbol, 0, 0, orderTypeTime, 0, comment + " Partial");
+         negocio.BuyLimit(1.0, simbolo.Last()-1000, _Symbol, 0, 0, orderTypeTime, 0, comment + " Partial");
+      }
+      else
+      {
+         //....
+      }
+      InseriuParcial = true;
+   }
+   
+   //....
+}
+
+void ExpiringOrdersPartial(string symbol, long m_magic)
+{  
+   int total = OrdersTotal();
+   for(int i = total - 1; i >= 0; i--)
+   {    
+      ulong  order_ticket  = OrderGetTicket(i);
+      
+      if((OrderGetString(ORDER_SYMBOL) != symbol) || (OrderGetInteger(ORDER_MAGIC) != m_magic))
+         return;
+      
+      string comment = OrderGetString(ORDER_COMMENT);
+      string tokenB  = "[part:";
+      string tokenE  = "]";
+      
+      int posB = StringFind(comment,tokenB);
+      if (posB != -1)
+      {
+         int posE = StringFind(comment,tokenE, posB + StringLen(tokenB));
+         if (posE == -1)
+            return;
+         
+         string position_ticketS = StringSubstr(comment, posB + StringLen(tokenB), posE - (posB + StringLen(tokenB)));
+         ulong  position_ticket  = (ulong)StringToInteger(position_ticketS);
+         
+         if (!PositionSelectByTicket(position_ticket))
+            OrderDelete(order_ticket);
+      }
+   }
+}

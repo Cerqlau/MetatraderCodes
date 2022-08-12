@@ -1,0 +1,137 @@
+//+------------------------------------------------------------------+
+//|  ENTRADAS PARCIAIS                                               |
+//+------------------------------------------------------------------+
+void EntradaParcial(string pos, double lastprice, int numSaida)
+{
+   double volume = 0;
+   double PrecoFutEntradas = 0;
+
+
+   //Entradas a FAVOR e posicao POSITIVA
+   if(OpenPartial == 1 && PosicaoInfo.Profit()>0)
+   {
+      if(pos=="Comprado")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = OpenVolume;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance;
+               break;
+            case 2:
+               volume = OpenVolume2;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance + OpenDistance2;
+               break;
+            case 3:
+               volume = OpenVolume3;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance + OpenDistance2 + OpenDistance3;
+               break;
+            }
+      
+         //Last acima do preço futuro
+         if(lastprice >= PrecoFutEntradas )
+           {
+            if(Compra(volume, "Comprado: Entrada a FAVOR"))
+               {
+                  EntradasFeitas += 1;
+               }
+           }
+      }
+
+      if(pos=="Vendido")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = OpenVolume;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance;
+               break;
+            case 2:
+               volume = OpenVolume2;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance - OpenDistance2;
+               break;
+            case 3:
+               volume = OpenVolume3;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance - OpenDistance2 - OpenDistance3;
+               break;
+            }
+      
+         //Last abaixo do preço futuro
+         if(lastprice <= PrecoFutEntradas )
+           {
+            if(Venda(volume, "Vendido: Entrada a FAVOR"))
+               {
+                  EntradasFeitas += 1;
+               }
+           }
+      }
+
+   }//Fim do A FAVOR
+
+
+
+
+
+   //Entradas CONTRA e posicao NEGATIVA
+   if(OpenPartial == 0 && PosicaoInfo.Profit()<0)
+   {
+      if(pos=="Comprado")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = OpenVolume;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance;
+               break;
+            case 2:
+               volume = OpenVolume2;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance - OpenDistance2;
+               break;
+            case 3:
+               volume = OpenVolume3;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() - OpenDistance - OpenDistance2 - OpenDistance3;
+               break;
+            }
+      
+         //Last abaixo do preço futuro
+         if(lastprice <= PrecoFutEntradas )
+           {
+            if(Compra(volume, "Comprado: Entrada CONTRA"))
+               {
+                  EntradasFeitas += 1;
+               }
+           }
+      }
+
+      if(pos=="Vendido")
+      {
+         switch(numSaida)
+           {
+            case 1:
+               volume = OpenVolume;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance;
+               break;
+            case 2:
+               volume = OpenVolume2;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance + OpenDistance2;
+               break;
+            case 3:
+               volume = OpenVolume3;
+               PrecoFutEntradas = PosicaoInfo.PriceOpen() + OpenDistance + OpenDistance2 + OpenDistance3;
+               break;
+            }
+      
+         //Last acima do preço futuro
+         if(lastprice >= PrecoFutEntradas )
+           {
+            if(Venda(volume, "Vendido: Entrada CONTRA"))
+               {
+                  EntradasFeitas += 1;
+               }
+           }
+      }
+
+   }//Fim do CONTRA
+
+
+}

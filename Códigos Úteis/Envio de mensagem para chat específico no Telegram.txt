@@ -1,0 +1,207 @@
+input string Token = "";
+input bool   ComandosExt = true; // Aceitar comandos externos
+input bool   Todos = false; // Aceitar comandos de todos
+input int    m_ID  = 0;     // ID único de chat específico
+string ID = (string)m_ID;
+//+------------------------------------------------------------------+
+//|                         |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   EventSetTimer(2); // Atualiza a cada 2 segundos
+   printf("_______ TELEGRAM HABILITADO _______ ");
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//|                             |
+//+------------------------------------------------------------------+
+void OnDeinit(const int motivo)
+  {
+   EventKillTimer();
+   printf("_______ TELEGRAM DESABILITADO POR MOTIVO %d _______ ",motivo);
+  }
+//+------------------------------------------------------------------+
+//|                         |
+//+------------------------------------------------------------------+
+void OnTimer()
+  {
+   if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
+      return; // Verifica se há habilitação no terminal
+
+   if(ComandosExt) // verifica se está habilitado a verificação de mensagem pelo telegram
+      ComandosExternos();
+  }
+//+------------------------------------------------------------------+
+//|                         |
+//+------------------------------------------------------------------+
+bool VerificarTelegram(string &texto, string &id)
+  {
+   string site = "https://api.telegram.org"; // Página do telegram que deve ser autorizada no terminal
+   string dominio = site+"/bot"+Token; // Padrão de todas as páginas associadas ao bot
+   string url = dominio+"/getUpdates"; // getUpdates pede para atualizar a página
+   string headers; // cabeçalho
+   char   post[];
+   char   result[]; // Dados da página em html gerada pela solicitação
+   string nome; // Nome de quem enviou uma mensagem
+   string sobrenome;
+   string data; // hora da mensagem recebida, hora do servidor do telegram
+
+   int res = WebRequest("GET",url,NULL,NULL,500,post,0,result,headers);
+
+   if(res==-1)
+     {
+      printf("ERRO %d no WebRequest da verificação de mensagem do telegram!",GetLastError());
+      MessageBox("É necessário adicionar '"+site+"' à lista de URL permitidas na guia 'Experts'","Erro",MB_ICONINFORMATION);
+     }
+   else
+      if(res!=200)
+        {
+         printf("Erro de download '%s' na verificação de mensagem do telegram. Código de retorno %d",site,res);
+         return false;
+        }
+
+   string chat = CharArrayToString(result);
+   int    i = StringFind(chat,"message_id"); // procurando o id da mensagem recebida na página html gerada
+
+   while(i > -1)
+     {
+      chat = StringSubstr(chat,i+1);
+      i = StringFind(chat,"message_id");
+     }
+
+   i = StringFind(chat,"chat")+12;
+   id = StringSubstr(chat,i,StringFind(chat,",",i)-i); // localizando id de quem enviou a mensagem
+
+   i = StringFind(chat,"first_name",i)+13;
+   nome = StringSubstr(chat,i,StringFind(chat,",",i)-i-1);
+
+   i = StringFind(chat,"last_name",i)+12;
+   sobrenome = StringSubstr(chat,i,StringFind(chat,",",i)-i-1);
+
+   i = StringFind(chat,"date",i)+6;
+   datetime hora = (int)StringSubstr(chat,i,StringFind(chat,",",i)-i);
+   data = TimeToString(hora);
+
+   i = StringFind(chat,"text",i)+7;
+   texto = StringSubstr(chat,i,StringFind(chat,"}",i)-i-1);
+
+   static datetime telegram=0;
+   bool novamsg = false;
+
+// condição para atualizar somente se houver nova mensagem detectada, atualiza pela hora da mensagem
+   if(telegram == 0)
+      telegram = hora;
+   else
+      if(hora > telegram)
+        {
+         novamsg = true; // confirmando recibemineto de nova mensagem
+         telegram = hora;
+        }
+
+   if(novamsg)
+     {
+      printf("[%s][%s %s] %s",data,nome,sobrenome,texto); // Exibi dados de quem enviou a mensagem
+
+      chat = "Mensagem recebida com sucesso!";
+      EnviarTelegram(chat,id); // Enviando a mensagem para o id de quem recebeu a msg
+      return true;
+     }
+
+   return false;
+  }
+//+------------------------------------------------------------------+
+//|                        ENVIO DE MENSAGEM                         |
+//+------------------------------------------------------------------+
+void EnviarTelegram(string chat, string id)
+  {
+   string   site = "https://api.telegram.org";
+   string   dominio = site+"/bot"+Token; // Url padrão telegram do bot
+   string   url = dominio+"/sendMessage?chat_id="+id+"&text="+chat; // Comando para envio da msg contendo o id e a mensagem
+   string   headers;
+   char     post[];
+   char     result[];
+
+   int res = WebRequest("GET",url,NULL,NULL,500,post,0,result,headers);
+
+   if(res==-1)
+     {
+      printf("ERRO %d no WebRequest de envio de mensagem do telegram!",GetLastError());
+      MessageBox("É necessário adicionar '"+site+"' à lista de URL permitidas na guia 'Experts'","Erro",MB_ICONINFORMATION);
+     }
+   else
+      if(res==200)
+        {
+         printf("%s",chat);
+         printf("MENSAGEM ENVIADA P/ %s",id);
+        }
+      else
+         printf("Erro de download '%s' no envio de mensagem do telegram. Código de retorno %d",site,res);
+  }
+//+------------------------------------------------------------------+
+//|                         |
+//+------------------------------------------------------------------+
+bool ComandosExternos()
+  {
+   string texto;
+   string id;
+
+   if(VerificarTelegram(texto,id)) // Chamando a função que atualiza a página
+      if(id == ID || Todos == true) // Verifica se envia msg para ID especifico ou para todos que mandarem mensagem
+        {
+         string chat = "COMANDO VALIDADO";
+
+         if(!ReferenciasTelegram(texto))
+           {
+            chat = "COMANDO NÃO RECONHECIDO";
+            EnviarTelegram(chat,id);
+            return false;
+           }
+
+         EnviarTelegram(chat,id);
+         return true;
+        }
+
+   return true;
+  }
+//+------------------------------------------------------------------+
+//|                                         |
+//+------------------------------------------------------------------+
+bool ReferenciasTelegram(string comando)
+  {
+   enum esc_comandos // Os comando recebidos pertencem aoenumerador e tem que ser idêntico mais/minus
+     {
+      DEFAULT  = 0,
+      REMOVE  = 1,
+      PAUSAS = 2,
+      PAUSAN  = 3
+     };
+
+   esc_comandos referencia = 3; // O valor inicia tem que ser igual ao bvalor do último elemento do enumerador
+   while(referencia>0)
+     {
+      if(comando==EnumToString((esc_comandos)referencia))
+         break;
+
+      referencia--;
+     }
+
+   switch(referencia) // Lista de comandos
+     {
+      case 1:
+         printf("ESCOLHIDO OPÇÃO (1)");
+         break;
+      case 2:
+         printf("ESCOLHIDO OPÇÃO (2)");
+         break;
+      case 3:
+         printf("ESCOLHIDO OPÇÃO (3)");
+         break;
+      default:
+         printf("ESCOLHIDO OPÇÃO (default)");
+         return false;
+         break;
+     }
+
+   return true;
+  }
+//+------------------------------------------------------------------+
